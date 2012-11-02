@@ -1,0 +1,25 @@
+#! /usr/bin/python3 -u
+"""CURL wrapper"""
+from oauth2client import curl, db
+from argparse import ArgumentParser
+import sys
+
+def main():
+    p = ArgumentParser()
+    p.add_argument("--profile", default = "auto")
+    args, rest = p.parse_known_args()
+    if args.profile == "auto":
+        if not rest:
+            p.error("URL not specified")
+        #Find URL
+        server = db.url(rest[-1])
+        if server:
+            token_store = server.token_store()
+        else:
+            token_store = None
+    else:
+        token_store = db.server(args.profile).token_store()
+    c = curl.CurlWrapper(token_store)
+    sys.exit(c.main(rest))
+if __name__ == "__main__":
+    main()
