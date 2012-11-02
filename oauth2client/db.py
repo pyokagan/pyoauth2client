@@ -26,7 +26,7 @@ base_db = {
                 "https://www\.googleapis\.com/auth/structuredcontent|" \
                 "https://www\.googleapis\.com/auth/chromewebstore\.readonly|" \
                 "https://docs\.google\.com/feeds/|" \
-                "https://www\.googleapis\.com/auth/drive\.file|" \
+                "https://www\.googleapis\.com/drive|" \
                 "https://mail\.google\.com/mail/feed/atom|" \
                 "https://www\.googleapis\.com/auth/plus\.me|" \
                 "https://apps-apis\.google\.com/a/feeds/groups/|" \

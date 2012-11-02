@@ -24,11 +24,12 @@ class CurlWrapper:
     def call_curl(self, req, args, refresh = True):
         from subprocess import call
         from . import EndpointError
+        import sys
         if self.token_store:
             r = self.token_store.apply_req(req)
         else:
             r = req
-        return_code = call(["curl"] + self.req_to_curl_args(r) + ["-f"] + args)
+        return_code = call(["curl", "-f"] + args +  self.req_to_curl_args(r))
         if return_code == 22 and self.token_store and \
                 self.token_store.can_refresh and refresh:
             try:
