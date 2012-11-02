@@ -23,6 +23,7 @@ class CurlWrapper:
 
     def call_curl(self, req, args, refresh = True):
         from subprocess import call
+        from . import EndpointError
         if self.token_store:
             r = self.token_store.apply_req(req)
         else:
