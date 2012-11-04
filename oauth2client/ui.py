@@ -148,6 +148,56 @@ def ua_win_pyside(url, pipe = None):
     else:
         return False
 
+def ua_win_tk_check():
+    import sys
+    if "tkinter" in sys.modules:
+        from tkinter import Tk
+        try:
+            root = Tk()
+            root.destroy()
+            return True
+        except:
+            return False
+    elif "IPython.zmq.iostream" in sys.modules:
+        from IPython.zmq.iostream import OutStream
+        return isinstance(sys.stdout, OutStream)
+    else:
+        return False
+
+def ua_win_tk(url, pipe = None):
+    from tkinter import Tk, Frame, Label, Entry, StringVar, BOTH, Button, RIGHT
+    import sys
+    sys.stdout.flush()
+    instructions = "Visit the following URL to authorize the application:"
+    response = {"x": False}
+    root = Tk()
+    root.title("oAuth2 Authorization Required")
+    webbox = Frame(root)
+    instructions = Label(webbox, text = instructions)
+    instructions.pack(padx = 5, pady = 5)
+    urlstr = StringVar(value = url)
+    urlbox = Entry(webbox, textvariable = urlstr, state = "readonly")
+    urlbox.pack(padx = 5, pady = 5)
+    def open_browser():
+        from subprocess import Popen
+        p = Popen(["sensible-browser", url])
+    browserbutton = Button(webbox, text = "Open in web browser", command = open_browser)
+    browserbutton.pack(padx = 5, pady = 5)
+    webbox.pack(fill = BOTH, expand = 1)
+    if pipe:
+        def poll():
+            if pipe.poll():
+                root.destroy()
+                #Mutability ftw... wat
+                response["x"] = True
+            else:
+                root.after(300, poll)
+        root.after(300, poll)
+    cancelbutton = Button(root, text = "Cancel", command = root.destroy)
+    cancelbutton.pack(side = RIGHT, padx = 5, pady = 5)
+    root.mainloop()
+    return response["x"]
+
 def ua_win_tty(url, pipe = None):
     from subprocess import Popen
     tty_out = open("/dev/tty", "w")
@@ -181,7 +231,8 @@ def ua_handle_http(gen_user_req, redirect_uri, modify_port = True):
     #Step 3: If all fails, fall back to tty
     #Step 4: If that fails, Fail noisily
     url, context = gen_user_req(redirect_uri)
-    gui_handlers = [(ua_win_pyside, ua_win_pyside_check)]
+    gui_handlers = [(ua_win_pyside, ua_win_pyside_check),
+            (ua_win_tk, ua_win_tk_check)]
     #Step 1: Load handler based on what modules are already loaded
     result = None
     for x, y in gui_handlers:
